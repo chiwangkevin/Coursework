@@ -67,3 +67,35 @@ def stations_by_river(stations):
         rivers_with_st[river] = list_of_st
         
     return rivers_with_st
+  
+  def rivers_by_station_number(stations, N):
+    '''
+    This function returns a list of tuples (river name, number of stations on that river)
+    The list only includes N rivers with the greatest number of monitoring stations
+    input : stations:      a list of MonitoringStation objects
+            N              an int 
+    '''
+    
+    # Get a list of tuples of all rivers ( river name, number of stations )
+    list_of_tuple = []
+    map_with_stations = stations_by_river(stations)
+    set_of_river = rivers_with_stations(stations)
+    
+    for river in set_of_river:
+        specific_list = map_with_stations[river]
+        num = len(specific_list)
+        list_of_tuple.append((river, num))
+        
+    # sorted by numbers  (from small to large)
+    sorted_rivers = sorted(list_of_tuple, key=lambda tup: (-tup[1], tup[0]), reverse=False)
+    
+    # tell the number of stations of the lastest N station
+    num_of_Nth = sorted_rivers[N-1][1]
+    
+    # list : the river with number of stations larger that N
+    final_list = []
+    for river in sorted_rivers:
+        if river[1] >= num_of_Nth:
+            final_list.append(river)
+            
+    return final_list
