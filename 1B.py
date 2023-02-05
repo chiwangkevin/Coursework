@@ -14,4 +14,3 @@ def run():
     return [output[:10], output[-10:]]
 if __name__ == "__main__":
     run()
-Footer
