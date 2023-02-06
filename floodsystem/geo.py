@@ -1,40 +1,51 @@
-# Copyright (C) 2018 Garth N. Wells
-#
-# SPDX-License-Identifier: MIT
 """This module contains a collection of functions related to
 geographical data.
-
 """
 
-from .utils import sorted_by_key  # noqa
+from .utils import sorted_by_key
+
 from floodsystem.haversine import haversine as hs
 from floodsystem.stationdata import build_station_list
 
+
 def stations_by_distance(stations, p):
-  
+    '''
+    This function will output a list of (station, distance) of the disctance of input stations and given destination p
+    input variables:
+            stations:     list: a list of MonitoringStation objects
+            p:            tuple: the coord we compare to
+    '''
     output = []
 
-    # collect all the (station, distance)
-    for i in stations:
-        distance = hs(i.coord, p)
+    # collect all the (station, distance) tuples
+    for station in stations:
+        distance = hs(station.coord, p)
         output.append((station, distance))
 
     # sort the output tuples with respect to distance
     output = sorted_by_key(output, 1)
 
     return output
-  
+
+
 def stations_within_radius(stations, center, r):
-    
+    '''
+    This function will return a list of stations(type MonitoringStation)
+    input: 
+        stations : a list of MonitoringStation objects, 
+        center:  coordinate of x
+        r : the radius
+    '''
     new_stations = []
-    for i in stations:
-        distance = hs(i.coord, center)
+    for station in stations:
+        distance = hs(station.coord, center)
         if distance < r:
             new_stations.append(station)
             
     return new_stations
-  
- def rivers_with_stations(stations):
+            
+
+def rivers_with_stations(stations):
     '''
     This function returns a set of the name of rivers having at least one station
     Input :
@@ -67,8 +78,9 @@ def stations_by_river(stations):
         rivers_with_st[river] = list_of_st
         
     return rivers_with_st
-  
-  def rivers_by_station_number(stations, N):
+
+
+def rivers_by_station_number(stations, N):
     '''
     This function returns a list of tuples (river name, number of stations on that river)
     The list only includes N rivers with the greatest number of monitoring stations
