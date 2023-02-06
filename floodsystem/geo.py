@@ -51,7 +51,7 @@ def rivers_with_stations(stations):
     Input :
         stations:      a list of MonitoringStation objects
     '''
-    #get the name of rivers with stations
+    #get the name of rivers with stations, the method of set.add only add things that is not included in the set before
     rivers = set()
     for station in stations:
         rivers.add(station.river)
