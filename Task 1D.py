@@ -1,9 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Created on Sun Jan 28 22:10:02 2018
-@author: yw454
-"""
 from floodsystem.stationdata import build_station_list
 from floodsystem.geo import rivers_with_stations, stations_by_river
 
