@@ -1,10 +1,12 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 """
-Created Feb 2023
-@author: at2017
+Created on Sun Jan 28 22:10:02 2018
+@author: yw454
 """
-
 from floodsystem.stationdata import build_station_list
 from floodsystem.geo import rivers_with_stations, stations_by_river
+
 
 def run():
     '''Testing for rivers_with_stations and stations_by_river
