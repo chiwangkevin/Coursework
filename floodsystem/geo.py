@@ -53,7 +53,7 @@ def stations_by_river(stations):
 
 def rivers_by_station_number(stations, N):
 
-    """Takes in a list of stations object and an integer N
+    """Take in a list of stations object and an integer N
 	
 	Returns a list of tuples that shows the name of top N rivers 
 	with the greatest number of monitoring stations, and their respective numbers
