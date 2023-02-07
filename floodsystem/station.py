@@ -38,3 +38,43 @@ class MonitoringStation:
         d += "   river:         {}\n".format(self.river)
         d += "   typical range: {}".format(self.typical_range)
         return d
+        def typical_range_consistent(self):
+        '''
+        Return True if typical_range[0] <= typical_range[1] or typical_range is None
+        '''
+
+        # check typical_range availability
+        if self.typical_range is None:
+            return False
+        
+        # check consistency
+        return self.typical_range[1] >= self.typical_range[0]
+
+    def relative_water_level(self):
+        '''Returns relative latest water level
+        if all data are legal
+        '''
+        # verify data concerned
+        if self.latest_level is None or not self.typical_range_consistent():
+            return None
+
+        # store data in the object
+        self.rel_level = (self.latest_level - self.typical_range[0]) / (self.typical_range[1] - self.typical_range[0])
+        
+        # return relavtive water level
+        return self.rel_level
+
+
+def inconsistent_typical_range_stations(stations):
+    '''This function will apply typical range check to all the input stations
+    It will output station names in alphabetical order whose typical range is inconsistent
+    '''
+
+    # list comprehension is used here for the reason as follows:
+    # for fun dude~
+    output = [station.name for station in stations if not station.typical_range_consistent()]
+
+    # sort the output in alphabetical order
+    output = sorted(output)
+
+    return output
