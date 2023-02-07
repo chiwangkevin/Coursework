@@ -3,111 +3,94 @@ geographical data.
 """
 
 from .utils import sorted_by_key
+from .stationdata import build_station_list
+import numpy as np
 
-from floodsystem.haversine import haversine as hs
-from floodsystem.stationdata import build_station_list
+
+def haversine(theta):
+    """Computes the haversine function on input theta and returns the result"""
+    return np.sin(theta / 2) * np.sin(theta / 2)
+
+
+def spherical_distance(p1, p2):  # gotta convert to radians
+    """Returns the distance between two points (latitude,longitude) on the surface of a sphere in km"""
+    r = 6356.752
+    # Implement the haversine formula found on wikipedia
+    h = haversine((p2[0] - p1[0]) * np.pi / 180) + np.cos(p1[0] * np.pi / 180) * \
+        np.cos(p2[0] * np.pi / 180) * haversine((p2[1] - p1[1]) * np.pi / 180)
+    return 2 * r * np.arcsin(np.sqrt(h))
 
 
 def stations_by_distance(stations, p):
-    '''
-    This function will output a list of (station, distance) of the disctance of input stations and given destination p
-    input variables:
-            stations:     list: a list of MonitoringStation objects
-            p:            tuple: the coord we compare to
-    '''
-    output = []
-
-    # collect all the (station, distance) tuples
+    """Takes a list of stations and a point and returns a list of tuples
+    (station, distance) where distance is there spherical distance of that station
+    to p
+    """
+    result = []
     for station in stations:
-        distance = hs(station.coord, p)
-        output.append((station, distance))
+        distance = spherical_distance(station.coord, p)
+        result.append((station, distance))
 
-    # sort the output tuples with respect to distance
-    output = sorted_by_key(output, 1)
-
-    return output
+    return sorted_by_key(result, 1)
 
 
-def stations_within_radius(stations, center, r):
-    '''
-    This function will return a list of stations(type MonitoringStation)
-    input: 
-        stations : a list of MonitoringStation objects, 
-        center:  coordinate of x
-        r : the radius
-    '''
-    new_stations = []
-    for station in stations:
-        distance = hs(station.coord, center)
-        if distance < r:
-            new_stations.append(station)
-            
-    return new_stations
-            
+def stations_within_radius(stations, centre, r):
+    """ Takes a list of stations, a location, and a radius and returns
+    in no specific order a list of all of the stations within r
+    of centre. Latitudes and Longitudes are assumed to be valid as a precondition.
+    """
+    distances = stations_by_distance(stations, centre)
+    return [station_list for station_list, distance in distances if distance < r]
 
-def rivers_with_stations(stations):
-    '''
-    This function returns a set of the name of rivers having at least one station
-    Input :
-        stations:      a list of MonitoringStation objects
-    '''
-    #get the name of rivers with stations
+
+def rivers_with_station(stations):
+    """Takes a list of stations and returns a set of all the rivers
+    in alphabetic order upon which those stations are located"""
     rivers = set()
     for station in stations:
         rivers.add(station.river)
-        
+    rivers = sorted(rivers)
     return rivers
-        
-def stations_by_river(stations):
-    '''
-    This function returns a dictionary that map river names to a list of station objects on the river.
-    Input :
-        stations:      a list of MonitoringStation objects
-    '''
-    
-    rivers_with_st = dict()
-    
-    for river in rivers_with_stations(stations):
-        list_of_st = []
-        
-        for station in stations:
-            #forming a list with stations of that river
-            if station.river == river:
-                list_of_st.append(station.name)
-        #adding the list into map
-        rivers_with_st[river] = list_of_st
-        
-    return rivers_with_st
+
+
+def stations_by_river(stations, river):
+    """Takes a list of stations and returns a list of all the station names
+    on a specific river in alphabetic order"""
+    station_names = []
+    for station in stations:
+        if station.river == river:
+            station_names.append(station.name)
+    station_names = sorted(station_names)
+    return station_names
 
 
 def rivers_by_station_number(stations, N):
-    '''
-    This function returns a list of tuples (river name, number of stations on that river)
-    The list only includes N rivers with the greatest number of monitoring stations
-    input : stations:      a list of MonitoringStation objects
-            N              an int 
-    '''
-    
-    # Get a list of tuples of all rivers ( river name, number of stations )
-    list_of_tuple = []
-    map_with_stations = stations_by_river(stations)
-    set_of_river = rivers_with_stations(stations)
-    
-    for river in set_of_river:
-        specific_list = map_with_stations[river]
-        num = len(specific_list)
-        list_of_tuple.append((river, num))
-        
-    # sorted by numbers  (from small to large)
-    sorted_rivers = sorted(list_of_tuple, key=lambda tup: (-tup[1], tup[0]), reverse=False)
-    
-    # tell the number of stations of the lastest N station
-    num_of_Nth = sorted_rivers[N-1][1]
-    
-    # list : the river with number of stations larger that N
-    final_list = []
-    for river in sorted_rivers:
-        if river[1] >= num_of_Nth:
-            final_list.append(river)
-            
-    return final_list
+    """Take a list of stations and return the N rivers with the most stations upon
+    them, in the form of a list of tuples in descending order"""
+
+    # use another function in geo to build list of non-repeated rivers
+    rivers = rivers_with_station(stations)
+
+    # initialise list
+    rivers_with_count = []
+
+    for river in rivers:
+        count = 0
+        for station in stations:
+            if station.river == river:
+                count += 1
+
+        # now that the number of times the river appears in the station list
+        # has been determined, the river can be appended
+        rivers_with_count.append((river, count))
+
+    # sort list according to number of rivers
+    rivers_with_count = sorted(
+        rivers_with_count, key=lambda x: x[1], reverse=True)
+
+    # if the next river has the same number of stations, N must be increased
+    # to include this river
+    while rivers_with_count[N - 1][1] == rivers_with_count[N][1]:
+        N += 1
+
+    return rivers_with_count[:N]
