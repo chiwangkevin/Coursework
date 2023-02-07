@@ -2,95 +2,77 @@
 geographical data.
 """
 
-from .utils import sorted_by_key
-from .stationdata import build_station_list
-import numpy as np
+from .utils import sorted_by_key  # noqa
+from math import sqrt, asin, sin, cos, pi
 
+def great_circle_distance(coord1, coord2):
+	"""Takes in two tuples of lat/lon coords, and returns their great circle distance"""
+	lat1, lon1 = coord1
+	lat2, lon2 = coord2
+	lat1 = lat1/180*pi
+	lon1 = lon1/180*pi
+	lat2 = lat2/180*pi
+	lon2 = lon2/180*pi
+	return 6371*2*asin(sqrt((sin((lat1-lat2)/2))**2+cos(lat1)*cos(lat2)*(sin((lon1-lon2)/2))**2))
 
-def haversine(theta):
-    """Computes the haversine function on input theta and returns the result"""
-    return np.sin(theta / 2) * np.sin(theta / 2)
-
-
-def spherical_distance(p1, p2):  # gotta convert to radians
-    """Returns the distance between two points (latitude,longitude) on the surface of a sphere in km"""
-    r = 6356.752
-    # Implement the haversine formula found on wikipedia
-    h = haversine((p2[0] - p1[0]) * np.pi / 180) + np.cos(p1[0] * np.pi / 180) * \
-        np.cos(p2[0] * np.pi / 180) * haversine((p2[1] - p1[1]) * np.pi / 180)
-    return 2 * r * np.arcsin(np.sqrt(h))
-
-
-def stations_by_distance(stations, p):
-    """Takes a list of stations and a point and returns a list of tuples
-    (station, distance) where distance is there spherical distance of that station
-    to p
-    """
-    result = []
-    for station in stations:
-        distance = spherical_distance(station.coord, p)
-        result.append((station, distance))
-
-    return sorted_by_key(result, 1)
-
+def station_by_distance(stations, p):
+	"""Takes in a list of station objects, and a tuple of lat/lon coords
+	Returns a sorted list of stations with their corresponding distance from coord"""
+	output_list = []
+	for station in stations:
+		distance = great_circle_distance(station.coord, p)
+		output_list.append((station,distance))
+	return sorted(output_list, key=lambda x: x[1])
 
 def stations_within_radius(stations, centre, r):
-    """ Takes a list of stations, a location, and a radius and returns
-    in no specific order a list of all of the stations within r
-    of centre. Latitudes and Longitudes are assumed to be valid as a precondition.
-    """
-    distances = stations_by_distance(stations, centre)
-    return [station_list for station_list, distance in distances if distance < r]
-
+	"""Takes in a list of station objects, a tuple of lat/lon coords indicating the circle's centre, and a float indicating circle's radius
+	Returns a list of stations within the circle/radius defined"""
+	output_list = []
+	for station in stations:
+		distance = great_circle_distance(station.coord, centre)
+		if distance<r:
+			output_list.append(station)
+	return output_list
 
 def rivers_with_station(stations):
-    """Takes a list of stations and returns a set of all the rivers
-    in alphabetic order upon which those stations are located"""
-    rivers = set()
-    for station in stations:
-        rivers.add(station.river)
-    rivers = sorted(rivers)
-    return rivers
+	"""Takes in a list of station objects, returns a list of rivers with at least one station"""
+	output_set = set()
+	for station in stations:
+		output_set.add(station.river)
+	return output_set
 
-
-def stations_by_river(stations, river):
-    """Takes a list of stations and returns a list of all the station names
-    on a specific river in alphabetic order"""
-    station_names = []
-    for station in stations:
-        if station.river == river:
-            station_names.append(station.name)
-    station_names = sorted(station_names)
-    return station_names
-
+def stations_by_river(stations):
+	"""Takes in a list of station objects, returns a dictionary of rivers (keys) matched to a list of their corresponding stations (values)"""
+	output_dict = dict()
+	for station in stations:
+		if station.river in output_dict:
+			output_dict[station.river].append(station)
+		else:
+			output_dict[station.river]=[station]
+	return output_dict
 
 def rivers_by_station_number(stations, N):
-    """Take a list of stations and return the N rivers with the most stations upon
-    them, in the form of a list of tuples in descending order"""
 
-    # use another function in geo to build list of non-repeated rivers
-    rivers = rivers_with_station(stations)
+    """Takes in a list of stations object and an integer N
+	
+	Returns a list of tuples that shows the name of top N rivers 
+	with the greatest number of monitoring stations, and their respective numbers
+    The tuples are arranged from the ones with the most stations to the least stations
+    """
 
-    # initialise list
-    rivers_with_count = []
-
-    for river in rivers:
-        count = 0
-        for station in stations:
-            if station.river == river:
-                count += 1
-
-        # now that the number of times the river appears in the station list
-        # has been determined, the river can be appended
-        rivers_with_count.append((river, count))
-
-    # sort list according to number of rivers
-    rivers_with_count = sorted(
-        rivers_with_count, key=lambda x: x[1], reverse=True)
-
-    # if the next river has the same number of stations, N must be increased
-    # to include this river
-    while rivers_with_count[N - 1][1] == rivers_with_count[N][1]:
-        N += 1
-
-    return rivers_with_count[:N]
+    river_dict = stations_by_river(stations)
+    river_list = [] 
+    for river_name, station_obj_list in river_dict.items():
+        river_tuple = (river_name, len(station_obj_list))
+        river_list.append(river_tuple)
+    greatest_list = sorted(river_list, key = lambda x: x[1], reverse=True)
+    greatest_N_list = greatest_list[:N]
+    for i in range(N):
+        greatest_list.pop(0)
+    while True:
+        if greatest_list[0][1] == greatest_N_list[-1][1]:
+            greatest_N_list.append(greatest_list[0])
+            greatest_list.pop(0)
+        else:
+            break
+    return greatest_N_list
