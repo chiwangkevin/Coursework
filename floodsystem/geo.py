@@ -111,18 +111,3 @@ def rivers_by_station_number(stations, N):
             final_list.append(river)
             
     return final_list
-def stations_by_town(town):
-    """get stations of a given town name"""
-
-    assert type(town) is str
-
-    #get the stations data and sorted by latest water level
-    stations = build_station_list()
-
-    output = []
-    for station in stations:
-        if station.town == town:
-            output.append(station)
-        
-    return output
-    
