@@ -10,8 +10,12 @@ class MonitoringStation:
     """This class represents a river level monitoring station"""
 
     def __init__(self, station_id, measure_id, label, coord, typical_range,
-                 river, town):
+                 river, town): #Define all relevant attributes
 
+        """
+        The method __init__ initialises a station with data
+        """
+        
         self.station_id = station_id
         self.measure_id = measure_id
 
@@ -29,6 +33,11 @@ class MonitoringStation:
         self.latest_level = None
 
     def __repr__(self):
+        
+        """
+        The method __repr__ prints a description of the station
+        """
+        
         d = "Station name:     {}\n".format(self.name)
         d += "   id:            {}\n".format(self.station_id)
         d += "   measure id:    {}\n".format(self.measure_id)
