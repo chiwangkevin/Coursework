@@ -45,7 +45,7 @@ def stations_within_radius(stations, center, r):
     return new_stations
             
 
-ef rivers_with_stations(stations):
+def rivers_with_stations(stations):
     '''
     This function returns a set of the name of rivers having at least one station
     Input :
@@ -111,3 +111,6 @@ def rivers_by_station_number(stations, N):
             final_list.append(river)
             
     return final_list
+
+
+
