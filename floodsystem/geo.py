@@ -45,39 +45,39 @@ def stations_within_radius(stations, center, r):
     return new_stations
             
 
-def rivers_with_station(stations):
-    """
-    Function that, given a list of station objects,
-    returns a container with the names of the rivers with a monitoring station.
-    
-    Args:
-        stations (list): List of stations (MonitoringStation).
-    
-    Returns:
-        set: Set of names of rivers with a monitoring station.
-    """
-
-    return {station.river for station in stations}
+ef rivers_with_stations(stations):
+    '''
+    This function returns a set of the name of rivers having at least one station
+    Input :
+        stations:      a list of MonitoringStation objects
+    '''
+    #get the name of rivers with stations
+    rivers = set()
+    for station in stations:
+        rivers.add(station.river)
+        
+    return rivers
         
 def stations_by_river(stations):
-    """
-    Function that returns a dictionary that maps river names (the ‘key’)
-    to a list of station objects on a given river.
+    '''
+    This function returns a dictionary that map river names to a list of station objects on the river.
+    Input :
+        stations:      a list of MonitoringStation objects
+    '''
     
-    Args:
-        stations (list): List of stations (MonitoringStation).
+    rivers_with_st = dict()
     
-    Returns:
-        dict: Keys - river names.
-    """
-
-    return {key: list(value) for key, value in groupby(
-        sorted(
-            stations,
-            key=lambda x: x.river
-        ),
-        lambda x: x.river
-    )}
+    for river in rivers_with_stations(stations):
+        list_of_st = []
+        
+        for station in stations:
+            #forming a list with stations of that river
+            if station.river == river:
+                list_of_st.append(station.name)
+        #adding the list into map
+        rivers_with_st[river] = list_of_st
+        
+    return rivers_with_st
 
 
 def rivers_by_station_number(stations, N):
