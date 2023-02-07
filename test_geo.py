@@ -1,98 +1,84 @@
-""Unit test for geo module""
+from floodsystem.stationdata import build_station_list
+from floodsystem.geo import *
 
-from random import random
+def test_great_circle_distance():
+    assert round(great_circle_distance((0.1,0.2),(0.5, 0.6)),1)==62.9
 
-from floodsystem.geo import station_by_distance, stations_within_radius, rivers_with_station, stations_by_river, rivers_by_station_number
-from floodsystem.station import MonitoringStation
-
-def station_create_test(s, s_id, m_id, label, coord, trange, river, town):
-    assert s.station_id == s_id
-    assert s.measure_id == m_id
-    assert s.name == label
-    assert s.coord == coord
-    assert s.typical_range == trange
-    assert s.river == river
-    assert s.town == town
-
-
-def create_test_stations(n):
-
-    # Create n number of stations
-    stations = []
-    for i in range(n):
-        s_id = "s-id-" + str(i)
-        m_id = "m-id-" + str(i)
-        label = "station" + str(i)
-        coord = (i*1.5, i*1.5)
-        trange = (-2.3, 3.4445)
-        river = "River X"
-        town = "My Town"
-        s = MonitoringStation(s_id, m_id, label, coord, trange, river, town)
-
-        #Checking station created correctly:
-        station_create_test(s, s_id, m_id, label, coord, trange, river, town)
-         
-  
-        stations.append(s) #Adding randomly generated Station into list of stations
-
-    return stations
-
-
-
-
-
-def test_stations_by_distance():
-
-    stations = create_test_stations(3)
-
-    print(stations)
-    p = (2.0, 2.0)
-    distances = stations_by_distance(stations, p)
-
-    assert len(distances) == 3
-    assert sorted(distances, key=lambda x: x[1]) == distances
-    assert type(distances[0][0]) == MonitoringStation
-    assert type(distances[1][0]) == MonitoringStation
-    assert type(distances[2][0]) == MonitoringStation
-    assert type(distances[0][1]) == float
-    assert type(distances[1][1]) == float
-    assert type(distances[2][1]) == float
+def test_station_by_distance():
+    stations = build_station_list()
+    station_by_distance_list = station_by_distance(stations, (52.2053,0.1218))
+    #Check it's sorted
+    assert sorted(station_by_distance_list, key=lambda x: x[1])==station_by_distance_list
+    #Check distances are right
+    for i in station_by_distance_list:
+        assert i[1]==great_circle_distance(i[0].coord, (52.2053,0.1218))
 
 def test_stations_within_radius():
-
-    centre = (2.0, 2.0)
-    radius = 200
-
-    stations = create_test_stations(3)
-
-    stations = stations_within_radius(stations, centre, radius)
-
-    assert len(stations) == 2
-    assert stations[0].station_id == 's-id-1'
-    assert stations[1].station_id == 's-id-2'
+    stations = build_station_list()
+    stations_within_radius_list = stations_within_radius(stations, (52.2053,0.1218), 10)
+    #Check all are within radius
+    for i in stations_within_radius_list:
+        assert great_circle_distance(i.coord, (52.2053,0.1218)) <= 10
 
 def test_rivers_with_station():
-
-    stations = create_test_stations(3)
-    stations[0].river = 'Nile'
-    stations[1].river = 'Nile'
-    stations[2].river = 'Rubicon'
-
-    rivers = rivers_with_station(stations)
-
-    assert len(rivers) == 2
-    assert 'Nile' in rivers
-    assert 'Rubicon' in rivers
+    stations = build_station_list()
+    rivers_with_station_list = rivers_with_station(stations)
 
 def test_stations_by_river():
+    stations = build_station_list()
+    stations_by_river_dict = stations_by_river(stations)
+    for i in stations_by_river_dict.keys():
+        for j in stations_by_river_dict[i]:
+            assert j.river == i
 
-    stations = create_test_stations(3)
-    stations[0].river = 'Nile'
-    stations[1].river = 'Nile'
-    stations[2].river = 'Rubicon'
+def test_rivers_by_station_number():
+    stations = build_station_list()
+    N = 9
+    river_dict = stations_by_river(stations)
+    
+    #check river_dict is a dictionary
+    assert type(river_dict) == type(dict())
 
-    stations_dict = stations_by_river(stations)
+    river_list = []
+    
+    for river_name, station_obj_list in river_dict.items():
+        river_tuple = (river_name, len(station_obj_list))
+       
+        #check river_tuple is a tuple
+        assert type(river_tuple) == type(tuple())
+        #check river_tuple is of length 2
+        assert len(river_tuple) == 2
 
-    assert len(stations_dict) == 2
-    assert len(stations_dict['Nile']) == 2
-    assert len(stations_dict['Rubicon']) == 1
+        river_list.append(river_tuple)
+
+    greatest_list = sorted(river_list, key = lambda x: x[1], reverse=True)
+
+    #check greatest_list contains all needed items
+    assert len(greatest_list) == len(river_dict)
+    #check greatest_list is sorted
+    assert greatest_list[0][1] > greatest_list[-1][1]
+
+    greatest_N_list = greatest_list[:N]
+
+    #check greatest_N_list length = N
+    assert len(greatest_N_list) == N
+
+    for i in range(N):
+        greatest_list.pop(0)
+
+    #check greatest_list length = original length - N
+    assert len(greatest_list) == len(river_dict) - N
+    #check content in greatest_list & greatest_N_list is a tuple
+    assert type(greatest_list[0]) == type(tuple())
+    assert type(greatest_N_list[-1]) == type(tuple())
+    #check content in tuples are integers
+    assert type(greatest_list[0][1]) == type(int())
+    assert type(greatest_N_list[-1][1]) == type(int())
+
+    while True:
+        if greatest_list[0][1] == greatest_N_list[-1][1]:
+            greatest_N_list.append(greatest_list[0])
+            greatest_list.pop(0)
+        else:
+            break
+    return 
