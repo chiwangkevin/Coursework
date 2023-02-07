@@ -1,45 +1,29 @@
+from floodsystem.geo import rivers_with_station, stations_by_river
 from floodsystem.stationdata import build_station_list
-from floodsystem.geo import rivers_with_stations, stations_by_river
 
 
 def run():
-    '''Testing for rivers_with_stations and stations_by_river
-    '''
+    """
+    * Print how many rivers have at least one monitoring station
+    * Prints the first 10 of these rivers in alphabetical order
+    * Print the names of the stations located on the following rivers in alphabetical order:
+        - 'River Aire'
+        - 'River Cam'
+        - 'River Thames'
+    """
     stations = build_station_list()
-    river_sets = rivers_with_stations(stations)
-    # showing the number of rivers with stations
-    print('There are {} rivers with stations'.format(len(river_sets)))
-    
-    output = []
-    output.append(len(river_sets))
-    
-    river_list = []
-    for river in river_sets:
-        river_list.append(river)
-    sorted_river = sorted(river_list)
+    rivers = rivers_with_station(stations)
+    print(len(rivers))
+    print(sorted(rivers)[:10])
 
-    print(sorted_river[:10])
-    
-    output.append(sorted_river[:10])
-    
-    def prt(river_name, output):
-        '''This functions will print the list of stations on the given rivers 
-        Input:
-            river_name:  name of given river, type: string
-        '''
-        # get lists of rivers mapped to river names
-        list_of_stations = stations_by_river(stations)
-        
-        print(river_name + " has stations including: ")
-        print(sorted(list_of_stations[river_name]))
-        output.append(sorted(list_of_stations[river_name]))
+    print()
 
-    prt('River Aire', output)
-    prt('River Cam', output)
-    prt('Thames', output)
-    
-    return output
+    stations_on_river = stations_by_river(stations)
+    for river in ['River Aire', 'River Cam', 'River Thames']:
+        print(river + ':')
+        print(sorted([i.name for i in stations_on_river[river]]))
 
 
 if __name__ == "__main__":
+    print("*** Task 1D: CUED Part IA Flood Warning System ***")
     run()
