@@ -2,7 +2,7 @@
 geographical data.
 """
 
-from .utils import sorted_by_key  # noqa
+from floodsystem.utils import sorted_by_key  # noqa
 from math import sqrt, asin, sin, cos, pi
 
 def great_circle_distance(coord1, coord2):
