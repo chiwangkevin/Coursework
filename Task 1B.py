@@ -1,27 +1,25 @@
-
-from floodsystem.geo import stations_by_distance
 from floodsystem.stationdata import build_station_list
-
+from floodsystem.geo import station_by_distance
 
 def run():
-    ''' Testing for stations_by_distance
-    '''
-    # generate stations list
+    """Requirements for Task 1B"""
+
+    # Build list of stations
     stations = build_station_list()
-
-    # get distance
-    p_cam_center = (52.2053, 0.1218)
-    output = stations_by_distance(stations, p_cam_center)
-
-    # change each element from (obj, dis) to (name, town, dis)
-    output = [(station.name, station.town, distance) for station, distance in output]
-
-    # do the output
-    print(output[:10])
-    print()
-    print(output[-10:])
-    return [output[:10], output[-10:]]
-
+    #Example Code
+    station_by_distance_list = station_by_distance(stations, (52.2053,0.1218))
+    nearest_10=[]
+    print("Nearest")
+    for i in station_by_distance_list[:10]:
+        nearest_10.append((i[0].name, i[1]))
+    print(nearest_10)
+    
+    print("Furthest")
+    furthest_10=[]
+    for i in station_by_distance_list[-10:]:
+        furthest_10.append((i[0].name, i[1]))
+    print(furthest_10)
 
 if __name__ == "__main__":
+    print("*** Task 1B: CUED Part IA Flood Warning System ***")
     run()
