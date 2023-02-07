@@ -16,8 +16,8 @@ def great_circle_distance(coord1, coord2):
 	return 6371*2*asin(sqrt((sin((lat1-lat2)/2))**2+cos(lat1)*cos(lat2)*(sin((lon1-lon2)/2))**2))
 
 def station_by_distance(stations, p):
-	"""Takes in a list of station objects, and a tuple of lat/lon coords
-	Returns a sorted list of stations with their corresponding distance from coord"""
+	"""Takes in a list of station objects, and a tuple of latitude/longitude coordinates
+	Returns a sorted list of stations with their corresponding distance from coordinates"""
 	output_list = []
 	for station in stations:
 		distance = great_circle_distance(station.coord, p)
@@ -25,7 +25,7 @@ def station_by_distance(stations, p):
 	return sorted(output_list, key=lambda x: x[1])
 
 def stations_within_radius(stations, centre, r):
-	"""Takes in a list of station objects, a tuple of lat/lon coords indicating the circle's centre, and a float indicating circle's radius
+	"""Takes in a list of station objects, a tuple of latitude/longitude coordinates indicating the circle's centre, and a float indicating circle's radius
 	Returns a list of stations within the circle/radius defined"""
 	output_list = []
 	for station in stations:
