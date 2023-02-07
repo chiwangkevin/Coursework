@@ -2,7 +2,8 @@ from floodsystem.stationdata import build_station_list
 from floodsystem.geo import rivers_with_station, stations_by_river
 
 def run():
-    """Requirements for Task 1D"""
+    """Uses geo.rivers_with_station to print how many rivers have at least one monitoring station 
+    (Representative result: 843) and prints the first 10 of these rivers in alphabetical order. Representative output:"""
 
     # Build list of stations
     stations = build_station_list()
