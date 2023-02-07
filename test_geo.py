@@ -1,4 +1,4 @@
-"""Unit test for geo module"""
+""Unit test for geo module""
 
 from random import random
 
