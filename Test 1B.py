@@ -1,4 +1,4 @@
-from Task 1B import run
+from Task1B import run
 
 def test_task1B():
     in_put = run()
