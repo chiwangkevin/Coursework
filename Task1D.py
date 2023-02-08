@@ -10,7 +10,10 @@ def run():
     rivers_with_station_list = rivers_with_station(stations)
     print(str(len(rivers_with_station_list))+" rivers with station(s). The first 10 are...")
     print(sorted(rivers_with_station_list)[:10])
-
+    '''
+    Since a dictionary containing list of names of stations directing to their river nearby is created,
+    the following codes refers to the names of stations by three rivers respectively, the order of appearance is ordered.
+    '''
     stations_by_river_list = stations_by_river(stations)
     aire_stations = [i.name for i in stations_by_river_list["River Aire"]]
     cam_stations = [i.name for i in stations_by_river_list["River Cam"]]
