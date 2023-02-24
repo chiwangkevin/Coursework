@@ -6,7 +6,7 @@ from floodsystem.datafetcher import fetch_measure_levels
 import datetime
 
 def run():
-    """Requirements for Task 2E."""
+    """Requirements for Task 2E"""
     stations = build_station_list()
     update_water_levels(stations)
     stations = stations_highest_rel_level(stations, 5)
